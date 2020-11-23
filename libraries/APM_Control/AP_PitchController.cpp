@@ -152,7 +152,7 @@ int32_t AP_PitchController::_get_rate_out(float desired_rate, float scaler, bool
         float ki_rate = k_I * gains.tau;
 		//only integrate if gain and time step are positive and airspeed above min value.
 		if (dt > 0 && aspeed > 0.5f*float(aparm.airspeed_min)) {
-		    float integrator_delta = rate_error * ki_rate * delta_time * scaler;
+		    float integrator_delta = rate_error * abs(rate_error) * ki_rate * delta_time * scaler;
 			if (_last_out < -45) {
 				// prevent the integrator from increasing if surface defln demand is above the upper limit
 				integrator_delta = MAX(integrator_delta , 0);
@@ -182,9 +182,9 @@ int32_t AP_PitchController::_get_rate_out(float desired_rate, float scaler, bool
 	// Note the scaler is applied again. We want a 1/speed scaler applied to the feed-forward
 	// path, but want a 1/speed^2 scaler applied to the rate error path. 
 	// This is because acceleration scales with speed^2, but rate scales with speed.
-    _pid_info.P = desired_rate * kp_ff * scaler;
+    _pid_info.P = desired_rate * abs(desired_rate) * kp_ff * scaler;
     _pid_info.FF = desired_rate * k_ff * scaler;
-    _pid_info.D = rate_error * gains.D * scaler;
+    _pid_info.D = rate_error * abs(rate_error) * gains.D * scaler;
 	_last_out = _pid_info.D + _pid_info.FF + _pid_info.P;
     _pid_info.target = desired_rate;
     _pid_info.actual = achieved_rate;

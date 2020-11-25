@@ -146,7 +146,7 @@ int32_t AP_RollController::_get_rate_out(float desired_rate, float scaler, bool 
 	if (!disable_integrator && ki_rate > 0) {
 		//only integrate if gain and time step are positive and airspeed above min value.
 		if (dt > 0 && aspeed > float(aparm.airspeed_min)) {
-		    float integrator_delta = rate_error * ki_rate * delta_time * scaler;
+		    float integrator_delta = rate_error* abs(rate_error)* ki_rate * delta_time * scaler;
 			// prevent the integrator from increasing if surface defln demand is above the upper limit
 			if (_last_out < -45) {
                 integrator_delta = MAX(integrator_delta , 0);
@@ -170,8 +170,9 @@ int32_t AP_RollController::_get_rate_out(float desired_rate, float scaler, bool 
 	// Note the scaler is applied again. We want a 1/speed scaler applied to the feed-forward
 	// path, but want a 1/speed^2 scaler applied to the rate error path. 
 	// This is because acceleration scales with speed^2, but rate scales with speed.
-    _pid_info.D = rate_error * gains.D * scaler;
-    _pid_info.P = desired_rate * kp_ff * scaler;
+    _pid_info.D = rate_error* abs(rate_error)* gains.D * scaler;
+	float pitch_error = desired_rate * gains.tau / 0.01f;
+    _pid_info.P = pitch_error* abs(pitch_error) * kp_ff * scaler;
     _pid_info.FF = desired_rate * k_ff * scaler;
 
     if (dt > 0 && _slew_rate_max > 0) {

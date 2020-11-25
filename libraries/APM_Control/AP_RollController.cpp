@@ -171,8 +171,8 @@ int32_t AP_RollController::_get_rate_out(float desired_rate, float scaler, bool 
 	// path, but want a 1/speed^2 scaler applied to the rate error path. 
 	// This is because acceleration scales with speed^2, but rate scales with speed.
     _pid_info.D = rate_error* abs(rate_error)* gains.D * scaler;
-	float pitch_error = desired_rate * gains.tau / 0.01f;
-    _pid_info.P = pitch_error* abs(pitch_error) * kp_ff * scaler;
+	float roll_error = desired_rate * gains.tau / 0.01f;
+    _pid_info.P = roll_error* abs(roll_error) * kp_ff * scaler;
     _pid_info.FF = desired_rate * k_ff * scaler;
 
     if (dt > 0 && _slew_rate_max > 0) {
